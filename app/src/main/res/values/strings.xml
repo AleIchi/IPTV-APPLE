@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nombre_app">Fiber Z TV+</string>
+    
+    <!-- Login -->
+    <string name="entrar">Entrar</string>
+    <string name="url_servidor">URL del Servidor</string>
+    <string name="usuario">Usuario</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="entrar_con_id_dispositivo">Entrar con ID</string>
+    <string name="recordarme">Recordarme</string>
+    <string name="error_inicio_sesion">Error al iniciar sesión. Verifique sus credenciales.</string>
+    <string name="pista_url_servidor">http://midominio.com:8080</string>
+    
+    <!-- Navigation -->
+    <string name="tv_en_vivo">TV en Vivo</string>
+    <string name="peliculas">Películas</string>
+    <string name="series">Series</string>
+    <string name="radio">Radio</string>
+    <string name="favoritos">Favoritos</string>
+    <string name="seguir_viendo">Seguir Viendo</string>
+    <string name="buscar">Buscar</string>
+    <string name="ajustes">Ajustes</string>
+    
+    <!-- Player -->
+    <string name="reproducir">Reproducir</string>
+    <string name="pausa">Pausa</string>
+    <string name="detener">Detener</string>
+    <string name="siguiente">Siguiente</string>
+    <string name="anterior">Anterior</string>
+    <string name="pantalla_completa">Pantalla Completa</string>
+    <string name="salir_pantalla_completa">Salir Pantalla Completa</string>
+    
+    <!-- Settings -->
+    <string name="tema">Tema</string>
+    <string name="bloquear_capturas">Bloquear Capturas</string>
+    <string name="control_parental">Control Parental</string>
+    <string name="gestionar_servidores">Gestionar Servidores</string>
+    <string name="acerca_de">Acerca de</string>
+    
+    <!-- Themes -->
+    <string name="tema_clasico">Clásico</string>
+    <string name="tema_gris_oscuro">Gris Oscuro</string>
+    <string name="tema_azul_oscuro">Azul Oscuro</string>
+    <string name="tema_oscuro">Oscuro</string>
+    <string name="tema_oneui">OneUI</string>
+    <string name="tema_vibeui">VibeUI</string>
+    <string name="tema_glossy">Glossy</string>
+    <string name="tema_black_panther">Pantera Negra</string>
+    <string name="tema_movieui">CineUI</string>
+    <string name="tema_vui">VUI</string>
+    
+    <!-- Errors -->
+    <string name="error_red">Error de red. Verifique su conexión.</string>
+    <string name="error_carga">Error cargando contenido</string>
+    <string name="sin_contenido">No hay contenido disponible</string>
+    
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="guardar">Guardar</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="editar">Editar</string>
+    <string name="anadir">Añadir</string>
+    <string name="cargando">Cargando...</string>
+</resources>
