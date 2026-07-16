@@ -38,9 +38,3 @@ workflows:
           zip -r IPTV_FiberZ_iOS.ipa Payload
     artifacts:
       - iosApp/IPTV_FiberZ_iOS.ipa
-    publishing:
-      email:
-        recipients:
-          - $CM_BUILD_USER_EMAIL
-        notify:
-          success: true
