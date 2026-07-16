@@ -40,9 +40,9 @@ import com.iptv.fiber.interfaz.tema.*
 fun PantallaTvEnVivo(
     modeloVista: ModeloVistaContenido,
     repositorioAuth: RepositorioAutenticacion,
+    alNavegarReproductor: (String) -> Unit,
     alHacerBack: () -> Unit = {}
 ) {
-    val contexto = LocalContext.current
     val canalesFiltrados by modeloVista.canalesFiltrados.collectAsStateWithLifecycle()
     val idCategoriaSeleccionada by modeloVista.idCategoriaSeleccionada.collectAsStateWithLifecycle()
     val categorias by modeloVista.categoriasEnVivo.collectAsStateWithLifecycle()
@@ -64,7 +64,7 @@ fun PantallaTvEnVivo(
     }
 
     val alcance = rememberCoroutineScope()
-    val reproducirCanal = construirLambdaReproduccionCanal(contexto, repositorioAuth, modeloVista, alcance, canalesFiltrados)
+    val reproducirCanal = construirLambdaReproduccionCanal(alNavegarReproductor, modeloVista, alcance, canalesFiltrados)
 
     Box(modifier = Modifier.fillMaxSize().background(FondoPremium)) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 16.dp)) {
