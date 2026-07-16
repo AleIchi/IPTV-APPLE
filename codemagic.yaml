@@ -1,0 +1,46 @@
+workflows:
+  ios-kmp-workflow:
+    name: Compilar IPA para iOS (Fiber Z)
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      java: 17
+      xcode: latest
+      cocoapods: default
+    triggering:
+      events:
+        - push
+    scripts:
+      - name: Compilar Framework KMP (Compose)
+        script: |
+          chmod +x gradlew
+          ./gradlew :composeApp:build
+      - name: Instalar dependencias de iOS (CocoaPods)
+        script: |
+          cd iosApp
+          pod install
+      - name: Compilar App de iOS (IPA sin firma)
+        script: |
+          cd iosApp
+          xcodebuild build \
+            -workspace iosApp.xcworkspace \
+            -scheme iosApp \
+            -sdk iphoneos \
+            -configuration Release \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Empaquetar a IPA
+        script: |
+          cd iosApp
+          mkdir -p Payload
+          cp -r build/Release-iphoneos/iosApp.app Payload/
+          zip -r IPTV_FiberZ_iOS.ipa Payload
+    artifacts:
+      - iosApp/IPTV_FiberZ_iOS.ipa
+    publishing:
+      email:
+        recipients:
+          - $CM_BUILD_USER_EMAIL
+        notify:
+          success: true
