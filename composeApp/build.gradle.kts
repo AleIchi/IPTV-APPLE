@@ -51,7 +51,7 @@ kotlin {
             implementation("androidx.datastore:datastore-preferences-core:1.1.0")
             
             // Room
-            implementation("androidx.room:room-runtime:2.6.1")
+            implementation("androidx.room:room-runtime:2.7.0")
             
             // Navigation
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.7.0-alpha06")
@@ -74,7 +74,7 @@ kotlin {
             implementation("org.jellyfin.media3:media3-ffmpeg-decoder:1.2.0+1")
             
             // Room Android
-            implementation("androidx.room:room-ktx:2.6.1")
+            implementation("androidx.room:room-ktx:2.7.0")
             
             // Coil Android
             implementation("io.coil-kt:coil:2.5.0")
