@@ -1,0 +1,57 @@
+name: Compilar iOS (.ipa)
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: # Permite ejecutar la compilación manualmente desde GitHub
+
+jobs:
+  build:
+    runs-on: macos-14 # Ejecuta la compilación en una Mac virtual M1/M2 de GitHub
+    steps:
+      - name: Descargar codigo del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java (Requerido para Kotlin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Configurar Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Dar permisos de ejecucion a Gradle Wrapper
+        run: chmod +x gradlew
+
+      - name: Compilar Framework de Kotlin para iOS
+        run: ./gradlew :composeApp:assembleDebugAppleFrameworkForXcode
+
+      - name: Construir proyecto Xcode y archivo .ipa
+        run: |
+          # 1. Compila el proyecto Xcode usando la configuración Debug sin requerir firma (Sideloadly)
+          cd iosApp
+          xcodebuild clean build \
+            -project iosApp.xcodeproj \
+            -scheme iosApp \
+            -configuration Debug \
+            -sdk iphoneos \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            -derivedDataPath ../build/ios
+          
+          # 2. Crea el contenedor temporal Payload
+          cd ..
+          mkdir -p build/ios/ipa/Payload
+          
+          # 3. Mueve la aplicación compilada (.app) al Payload
+          mv build/ios/Build/Products/Debug-iphoneos/iosApp.app build/ios/ipa/Payload/
+          
+          # 4. Comprime el Payload en un archivo .ipa
+          cd build/ios/ipa
+          zip -r IPTV_FiberZ_Debug.ipa Payload
+
+      - name: Subir el archivo .ipa a GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipa-instalador-ios
+          path: build/ios/ipa/IPTV_FiberZ_Debug.ipa

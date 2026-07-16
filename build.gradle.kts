@@ -5,14 +5,17 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.12.3")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20")
+        classpath("com.android.tools.build:gradle:8.12.1")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10")
     }
 }
 
 plugins {
-    id("com.android.application") version "8.12.3" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.20" apply false
+    id("com.android.application") version "8.12.1" apply false
+    id("com.android.library") version "8.12.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.2.10" apply false
+    id("org.jetbrains.kotlin.multiplatform") version "2.2.10" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.10" apply false
 }
 
 tasks.register("clean", Delete::class) {

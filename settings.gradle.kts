@@ -15,5 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "IPTV Fiber"
-include(":app")
-
+include(":composeApp")

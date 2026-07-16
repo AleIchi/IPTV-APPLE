@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nombre_app">Fiber Z TV+</string>
+
+    <!-- Inicio de sesión -->
+    <string name="entrar">Entrar</string>
+    <string name="url_servidor">URL del servidor</string>
+    <string name="usuario">Usuario</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="entrar_con_id_dispositivo">Entrar con ID</string>
+    <string name="recordarme">Recordarme</string>
+    <string name="error_inicio_sesion">Error al iniciar sesión. Verifique sus credenciales.</string>
+    <string name="pista_url_servidor">http://midominio.com:8080</string>
+
+    <!-- Navegación -->
+    <string name="tv_en_vivo">TV en vivo</string>
+    <string name="favoritos">Favoritos</string>
+    <string name="seguir_viendo">Seguir viendo</string>
+    <string name="buscar">Buscar</string>
+    <string name="ajustes">Ajustes</string>
+
+    <!-- Reproductor -->
+    <string name="reproducir">Reproducir</string>
+    <string name="pausa">Pausa</string>
+    <string name="detener">Detener</string>
+    <string name="siguiente">Siguiente</string>
+    <string name="anterior">Anterior</string>
+    <string name="pantalla_completa">Pantalla completa</string>
+    <string name="salir_pantalla_completa">Salir de pantalla completa</string>
+
+    <!-- Ajustes -->
+    <string name="tema">Tema</string>
+    <string name="bloquear_capturas">Bloquear capturas</string>
+    <string name="control_parental">Control parental</string>
+    <string name="gestionar_servidores">Gestionar servidores</string>
+    <string name="acerca_de">Acerca de</string>
+
+    <!-- Temas -->
+    <string name="tema_clasico">Clásico</string>
+    <string name="tema_gris_oscuro">Gris oscuro</string>
+    <string name="tema_azul_oscuro">Azul oscuro</string>
+    <string name="tema_oscuro">Oscuro</string>
+    <string name="tema_claro_moderno">Claro moderno</string>
+    <string name="tema_vibrante">Vibrante</string>
+    <string name="tema_brillante">Brillante</string>
+    <string name="tema_pantera_negra">Pantera negra</string>
+    <string name="tema_cine">Cine</string>
+    <string name="tema_vidrio">Vidrio</string>
+
+    <!-- Errores -->
+    <string name="error_red">Error de red. Verifique su conexión.</string>
+    <string name="error_carga">Error al cargar contenido</string>
+    <string name="sin_contenido">No hay contenido disponible</string>
+
+    <!-- Común -->
+    <string name="ok">Aceptar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="guardar">Guardar</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="editar">Editar</string>
+    <string name="anadir">Añadir</string>
+    <string name="cargando">Cargando...</string>
+</resources>
