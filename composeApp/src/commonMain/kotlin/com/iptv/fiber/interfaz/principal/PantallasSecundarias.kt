@@ -27,14 +27,17 @@ import kotlinx.coroutines.launch
 
 /** Muestra la lista de canales marcados como favoritos con opción de reproducir o quitar el marcador. */
 @Composable
-fun PantallaFavoritos(modeloVista: ModeloVistaContenido, repositorioAuth: RepositorioAutenticacion) {
+fun PantallaFavoritos(
+    modeloVista: ModeloVistaContenido, 
+    repositorioAuth: RepositorioAutenticacion,
+    alNavegarReproductor: (String) -> Unit
+) {
     val favoritos by modeloVista.favoritos.collectAsStateWithLifecycle()
-    val contexto = LocalContext.current
     val alcance = rememberCoroutineScope()
 
     LaunchedEffect(Unit) { modeloVista.iniciarObservacionDatosUsuario() }
 
-    val reproducirCanal = construirLambdaReproduccion(contexto, alcance, repositorioAuth, modeloVista) {
+    val reproducirCanal = construirLambdaReproduccion(alcance, modeloVista, alNavegarReproductor) {
         favoritos.map { fav ->
             val basico = Canal(id_transmision = fav.idTransmision, nombre = fav.nombre, icono_transmision = fav.icono, id_categoria = "")
             modeloVista.obtenerCanalCompleto(fav.idTransmision, basico)
@@ -58,15 +61,17 @@ fun PantallaFavoritos(modeloVista: ModeloVistaContenido, repositorioAuth: Reposi
 
 /** Muestra los canales del historial de reproducción con opción de volver a reproducir o marcar como favorito. */
 @Composable
-fun PantallaHistorial(modeloVista: ModeloVistaContenido, repositorioAuth: RepositorioAutenticacion) {
+fun PantallaHistorial(
+    modeloVista: ModeloVistaContenido,
+    alNavegarReproductor: (String) -> Unit
+) {
     val historial by modeloVista.historial.collectAsStateWithLifecycle()
     val favoritos by modeloVista.favoritos.collectAsStateWithLifecycle()
-    val contexto = LocalContext.current
     val alcance = rememberCoroutineScope()
 
     LaunchedEffect(Unit) { modeloVista.iniciarObservacionDatosUsuario() }
 
-    val reproducirCanal = construirLambdaReproduccion(contexto, alcance, repositorioAuth, modeloVista) {
+    val reproducirCanal = construirLambdaReproduccion(alcance, modeloVista, alNavegarReproductor) {
         historial.map { h ->
             val basico = Canal(id_transmision = h.idTransmision, nombre = h.nombre, icono_transmision = h.icono, id_categoria = "")
             modeloVista.obtenerCanalCompleto(h.idTransmision, basico)
@@ -96,28 +101,15 @@ fun PantallaHistorial(modeloVista: ModeloVistaContenido, repositorioAuth: Reposi
  * [proveedorContexto] es una función suspendida que devuelve la lista completa para la navegación prev/next.
  */
 private fun construirLambdaReproduccion(
-    contexto: android.content.Context,
     alcance: kotlinx.coroutines.CoroutineScope,
-    repositorioAuth: RepositorioAutenticacion,
     modeloVista: ModeloVistaContenido,
+    alNavegarReproductor: (String) -> Unit,
     proveedorContexto: suspend () -> List<Canal>
 ): (Canal) -> Unit = { canal ->
     alcance.launch {
         modeloVista.establecerContextoReproduccion(proveedorContexto())
-        val servidor = repositorioAuth.servidorActual.first() ?: return@launch
         val completo = modeloVista.obtenerCanalCompleto(canal.id_transmision, canal)
-        val url = if (!completo.fuenteDirecta.isNullOrEmpty()) completo.fuenteDirecta
-        else repositorioAuth.construirUrlTransmision(servidor.urlServidor, servidor.usuario, servidor.contrasena, "live", completo.id_transmision)
-// TODO(KMP):         contexto.startActivity(Intent(contexto, ActividadReproductor::class.java).apply {
-            putExtra(ClavesReproductor.URL_TRANSMISION, url)
-            putExtra(ClavesReproductor.ID_TRANSMISION, canal.id_transmision)
-            putExtra(ClavesReproductor.TIPO_TRANSMISION, "live")
-            putExtra(ClavesReproductor.NOMBRE_CANAL, canal.nombre)
-            putExtra(ClavesReproductor.LOGOTIPO_CANAL, canal.icono_transmision)
-            putExtra(ClavesReproductor.SERVIDOR_URL, servidor.urlServidor)
-            putExtra(ClavesReproductor.USUARIO, servidor.usuario)
-            putExtra(ClavesReproductor.CONTRASENA, servidor.contrasena)
-        })
+        alNavegarReproductor(completo.id_transmision.toString())
         modeloVista.agregarAlHistorial(canal)
     }
 }

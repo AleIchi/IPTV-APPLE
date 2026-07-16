@@ -45,12 +45,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun InicioPanelPrincipal(
     alNavegar: (String) -> Unit,
+    alNavegarReproductor: (String) -> Unit,
     modeloVistaAuth: ModeloVistaAutenticacion,
     modeloVistaContenido: ModeloVistaContenido,
     repositorioAuth: RepositorioAutenticacion
 ) {
     ContenidoInicioPanelPrincipal(
         alNavegar = alNavegar,
+        alNavegarReproductor = alNavegarReproductor,
         alCerrarSesion = { modeloVistaAuth.cerrarSesion() },
         modeloVista = modeloVistaContenido,
         repositorioAuth = repositorioAuth
@@ -64,11 +66,12 @@ fun InicioPanelPrincipal(
 @Composable
 fun ContenidoInicioPanelPrincipal(
     alNavegar: (String) -> Unit,
+    alNavegarReproductor: (String) -> Unit,
     alCerrarSesion: () -> Unit,
     modeloVista: ModeloVistaContenido,
     repositorioAuth: RepositorioAutenticacion
 ) {
-    val contexto = LocalContext.current
+    val manejadorUris = androidx.compose.ui.platform.LocalUriHandler.current
     val todosCanales by modeloVista.canalesEnVivo.collectAsStateWithLifecycle()
     var datosInicialesCargados by remember { mutableStateOf(false) }
 
@@ -81,7 +84,7 @@ fun ContenidoInicioPanelPrincipal(
     }
 
     val alcance = rememberCoroutineScope()
-    val reproducirCanal = construirLambdaReproduccionCanal(contexto, repositorioAuth, modeloVista, alcance, todosCanales)
+    val reproducirCanal = construirLambdaReproduccionCanal(alNavegarReproductor, modeloVista, alcance, todosCanales)
 
     val canalesPrincipales by modeloVista.canalesPrincipales.collectAsStateWithLifecycle()
     val categoriasConCanales by modeloVista.categoriasPanelPrincipal.collectAsStateWithLifecycle()
@@ -168,7 +171,7 @@ fun ContenidoInicioPanelPrincipal(
                         modifier = Modifier
                             .fillMaxSize()
                             .clickable {
-// TODO(KMP):                                 contexto.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://fiberztelecom.com/")))
+                                manejadorUris.openUri("https://fiberztelecom.com/")
                             },
                         contentScale = ContentScale.Crop // Mantiene proporción perfecta sin estirar la imagen
                     )
@@ -255,36 +258,17 @@ private fun CabeceraSeccion(titulo: String, coda: @Composable () -> Unit = {}) {
 
 /** Construye la lambda de reproducción de canal para evitar código duplicado */
 fun construirLambdaReproduccionCanal(
-    contexto: android.content.Context,
-    repositorioAuth: RepositorioAutenticacion,
+    alNavegarReproductor: (String) -> Unit,
     modeloVista: ModeloVistaContenido,
     alcance: kotlinx.coroutines.CoroutineScope,
     listaContexto: List<com.iptv.fiber.datos.modelo.Canal>
 ): (com.iptv.fiber.datos.modelo.Canal) -> Unit {
-    // Leemos el servidor UNA vez al construir la lambda, no en cada click.
-    // servidorActual es un StateFlow, .value es inmediato y no suspende.
-    val servidor = repositorioAuth.servidorActual.value
     return { canal ->
-        if (servidor != null) {
-            // Construcción sincrónica de la URL — sin coroutine, sin delay
-            val urlTransmision = if (!canal.fuenteDirecta.isNullOrEmpty()) canal.fuenteDirecta
-            else repositorioAuth.construirUrlTransmision(servidor.urlServidor, servidor.usuario, servidor.contrasena, "live", canal.id_transmision)
-// TODO(KMP):             val intento = Intent(contexto, ActividadReproductor::class.java).apply {
-                putExtra(ClavesReproductor.URL_TRANSMISION, urlTransmision)
-                putExtra(ClavesReproductor.ID_TRANSMISION, canal.id_transmision)
-                putExtra(ClavesReproductor.TIPO_TRANSMISION, "live")
-                putExtra(ClavesReproductor.NOMBRE_CANAL, canal.nombre)
-                putExtra(ClavesReproductor.LOGOTIPO_CANAL, canal.icono_transmision)
-                putExtra(ClavesReproductor.SERVIDOR_URL, servidor.urlServidor)
-                putExtra(ClavesReproductor.USUARIO, servidor.usuario)
-                putExtra(ClavesReproductor.CONTRASENA, servidor.contrasena)
-            }
-            // Historial y contexto en segundo plano, no bloquean el lanzamiento
-            alcance.launch {
-                modeloVista.establecerContextoReproduccion(listaContexto)
-                modeloVista.agregarAlHistorial(canal)
-            }
-// TODO(KMP):             contexto.startActivity(intento)
+        // Historial y contexto en segundo plano, no bloquean el lanzamiento
+        alcance.launch {
+            modeloVista.establecerContextoReproduccion(listaContexto)
+            modeloVista.agregarAlHistorial(canal)
         }
+        alNavegarReproductor(canal.id_transmision.toString())
     }
 }

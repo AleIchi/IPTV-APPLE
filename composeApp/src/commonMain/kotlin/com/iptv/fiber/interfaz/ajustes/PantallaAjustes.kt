@@ -49,10 +49,8 @@ fun PantallaAjustes(
     modeloVistaAuth: ModeloVistaAutenticacion,
     alCerrarSesion: () -> Unit
 ) {
-    val contexto = LocalContext.current
-    val despachadorAtras = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    val preferencias = remember { contexto.getSharedPreferences("iptv_preferencias", Context.MODE_PRIVATE) }
-    val gestorPreferencias = remember { GestorPreferencias(contexto) }
+    val manejadorUris = androidx.compose.ui.platform.LocalUriHandler.current
+    val gestorPreferencias = remember { com.iptv.fiber.datos.local.GestorPreferencias() }
     val alcance = rememberCoroutineScope()
 
     // ── Estado de preferencias ──
@@ -547,8 +545,7 @@ fun PantallaAjustes(
                         descripcion = "+51 982 497 670 — Soporte técnico",
                         colorIcono = ColorExito,
                         alHacerClick = {
-// TODO(KMP):                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=51982497670&text=Hola%2C%20necesito%20soporte%20con%20la%20aplicaci%C3%B3n%20IPTV%20Fiber%20Z"))
-// TODO(KMP):                             contexto.startActivity(intent)
+                                manejadorUris.openUri("https://api.whatsapp.com/send?phone=51982497670&text=Hola%2C%20necesito%20soporte%20con%20la%20aplicaci%C3%B3n%20IPTV%20Fiber%20Z")
                         }
                     )
                     Divider(color = ColorDivisor, thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 16.dp))

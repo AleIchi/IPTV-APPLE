@@ -4,13 +4,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.iptv.fiber.datos.api.ClienteApi
+import com.iptv.fiber.datos.local.GestorPreferencias
+import com.iptv.fiber.datos.local.base_datos.getDatabaseBuilder
+import com.iptv.fiber.datos.repositorio.RepositorioAutenticacion
+import com.iptv.fiber.datos.repositorio.RepositorioContenido
+import com.iptv.fiber.interfaz.inicio_sesion.PantallaInicioSesion
+import com.iptv.fiber.interfaz.modelovista.ModeloVistaAutenticacion
+import com.iptv.fiber.interfaz.modelovista.ModeloVistaContenido
+import com.iptv.fiber.interfaz.principal.PantallaPrincipal
+import com.iptv.fiber.interfaz.reproductor.VideoPlayerScreen
 import com.iptv.fiber.interfaz.tema.TemaIPTVFiber
+import kotlinx.coroutines.flow.first
 
 /**
  * EL CEREBRO MULTIPLATAFORMA (Reemplazo de ActividadPrincipal).
@@ -19,8 +30,18 @@ import com.iptv.fiber.interfaz.tema.TemaIPTVFiber
  */
 @Composable
 fun App() {
-    // Nota: El ViewModel o la lectura de estado real debería pasarse aquí
-    // Para simplificar la migración estructural, iniciamos el tema por defecto.
+    // Instanciar dependencias manualmente para KMP (sin usar Koin u Hilt para mantener simplicidad)
+    val gestorPreferencias = remember { GestorPreferencias() }
+    val clienteApi = remember { ClienteApi() }
+    val repositorioAuth = remember { RepositorioAutenticacion(clienteApi, gestorPreferencias) }
+    
+    val daoFavorito = remember { getDatabaseBuilder().build().daoFavorito() }
+    val daoSeguirViendo = remember { getDatabaseBuilder().build().daoSeguirViendo() }
+    val repositorioContenido = remember { RepositorioContenido(clienteApi, repositorioAuth, daoFavorito, daoSeguirViendo) }
+
+    val modeloVistaAuth = remember { ModeloVistaAutenticacion(repositorioAuth) }
+    val modeloVistaContenido = remember { ModeloVistaContenido(repositorioContenido) }
+
     TemaIPTVFiber(temaPreferido = "clasico") {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -32,30 +53,45 @@ fun App() {
             NavHost(navController = navController, startDestination = "splash") {
                 
                 composable("splash") {
-                    // Aquí iría la lógica de verificar si el usuario tiene sesión guardada
-                    // simulamos que verificó y manda a login:
-                    // LaunchedEffect(Unit) { navController.navigate("login") }
+                    LaunchedEffect(Unit) {
+                        val sessionGuardada = gestorPreferencias.urlServidor.first().isNotEmpty()
+                        if (sessionGuardada) {
+                            navController.navigate("principal") {
+                                popUpTo("splash") { inclusive = true }
+                            }
+                        } else {
+                            navController.navigate("login") {
+                                popUpTo("splash") { inclusive = true }
+                            }
+                        }
+                    }
                 }
 
                 composable("login") {
-                    // PantallaInicioSesion(
-                    //     modeloVista = ..., 
-                    //     alIniciarSesionExitosamente = { navController.navigate("principal") }
-                    // )
+                    PantallaInicioSesion(
+                        modeloVista = modeloVistaAuth, 
+                        alIniciarSesionExitosamente = { 
+                            navController.navigate("principal") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        }
+                    )
                 }
 
                 composable("principal") {
-                    // PantallaPrincipal(
-                    //     modeloVista = ...,
-                    //     modeloVistaAuth = ...,
-                    //     repositorioAuth = ...,
-                    //     navController = navController // Pasamos el controlador para que pueda navegar al reproductor
-                    // )
+                    PantallaPrincipal(
+                        modeloVista = modeloVistaContenido,
+                        modeloVistaAuth = modeloVistaAuth,
+                        repositorioAuth = repositorioAuth,
+                        alNavegarReproductor = { streamId -> 
+                            navController.navigate("reproductor/$streamId") 
+                        }
+                    )
                 }
                 
                 composable("reproductor/{streamId}") { backStackEntry ->
                     val streamId = backStackEntry.arguments?.getString("streamId")
-                    com.iptv.fiber.interfaz.reproductor.VideoPlayerScreen(streamId = streamId)
+                    VideoPlayerScreen(streamId = streamId)
                 }
             }
         }

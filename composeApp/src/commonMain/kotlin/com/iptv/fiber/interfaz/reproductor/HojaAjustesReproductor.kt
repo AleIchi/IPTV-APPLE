@@ -27,7 +27,7 @@ fun HojaAjustesReproductor(
     alCambiarVelocidad: (Float) -> Unit,
     alCambiarEscalado: (Int) -> Unit
 ) {
-    val contexto = androidx.compose.ui.platform.LocalContext.current
+    val manejadorUris = androidx.compose.ui.platform.LocalUriHandler.current
 
     if (mostrar) {
         ModalBottomSheet(
@@ -61,11 +61,11 @@ fun HojaAjustesReproductor(
                     modifier = Modifier.clickable { 
                         val nuevoModo = (modoEscalado + 1) % 3
                         alCambiarEscalado(nuevoModo)
-// TODO(KMP):                         android.widget.Toast.makeText(contexto, "Modo: " + when(nuevoModo) {
+                        com.iptv.fiber.mostrarMensaje("Modo: " + when(nuevoModo) {
                             1 -> "Rellenar"
                             2 -> "Estirar"
                             else -> "Ajustar"
-                        }, android.widget.Toast.LENGTH_SHORT).show()
+                        })
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
@@ -84,7 +84,7 @@ fun HojaAjustesReproductor(
                             else -> 1.0f
                         }
                         alCambiarVelocidad(nuevaVelocidad)
-// TODO(KMP):                         android.widget.Toast.makeText(contexto, "Velocidad: ${if (nuevaVelocidad == 1.0f) "Estándar" else "${nuevaVelocidad}x"}", android.widget.Toast.LENGTH_SHORT).show()
+                        com.iptv.fiber.mostrarMensaje("Velocidad: ${if (nuevaVelocidad == 1.0f) "Estándar" else "${nuevaVelocidad}x"}")
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
@@ -97,11 +97,10 @@ fun HojaAjustesReproductor(
                     modifier = Modifier.clickable { 
                         try {
                             val mensaje = "Hola, quiero reportar una falla en el canal $nombreCanal en la aplicación Fiber Z."
-                            val url = "https://wa.me/51982497670?text=${java.net.URLEncoder.encode(mensaje, "UTF-8")}"
-// TODO(KMP):                             val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
-// TODO(KMP):                             contexto.startActivity(intent)
+                            val url = "https://wa.me/51982497670?text=${mensaje.replace(" ", "%20")}"
+                            manejadorUris.openUri(url)
                         } catch (e: Exception) {
-// TODO(KMP):                             android.widget.Toast.makeText(contexto, "No se pudo abrir WhatsApp", android.widget.Toast.LENGTH_SHORT).show()
+                            com.iptv.fiber.mostrarMensaje("No se pudo abrir WhatsApp")
                         }
                         alCerrar()
                     },

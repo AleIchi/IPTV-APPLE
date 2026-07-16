@@ -28,13 +28,13 @@ import com.iptv.fiber.interfaz.tema.FondoPremium
 fun PantallaPrincipal(
     modeloVista: ModeloVistaContenido,
     modeloVistaAuth: ModeloVistaAutenticacion,
-    repositorioAuth: RepositorioAutenticacion
+    repositorioAuth: RepositorioAutenticacion,
+    alNavegarReproductor: (String) -> Unit
 ) {
     val controladorNavegacion = rememberNavController()
     var tabSeleccionado by rememberSaveable { mutableIntStateOf(0) }
 
-    val contexto = androidx.compose.ui.platform.LocalContext.current
-    val gestorPrefs = remember(contexto) { com.iptv.fiber.datos.local.GestorPreferencias(contexto) }
+    val gestorPrefs = remember { com.iptv.fiber.datos.local.GestorPreferencias() }
     val bloqueoActivo by gestorPrefs.controlParentalActivo.collectAsState(initial = false)
     val pinCorrecto by gestorPrefs.pinParental.collectAsState(initial = "")
     var mostrarPinAjustes by remember { mutableStateOf(false) }
@@ -84,21 +84,30 @@ fun PantallaPrincipal(
                         },
                         modeloVistaAuth = modeloVistaAuth,
                         modeloVistaContenido = modeloVista,
-                        repositorioAuth = repositorioAuth
+                        repositorioAuth = repositorioAuth,
+                        alNavegarReproductor = alNavegarReproductor
                     )
                 }
                 composable("envivo") {
                     PantallaTvEnVivo(
                         modeloVista = modeloVista,
                         repositorioAuth = repositorioAuth,
-                        alHacerBack = { controladorNavegacion.popBackStack() }
+                        alHacerBack = { controladorNavegacion.popBackStack() },
+                        alNavegarReproductor = alNavegarReproductor
                     )
                 }
                 composable("favoritos") {
-                    PantallaFavoritos(modeloVista = modeloVista, repositorioAuth = repositorioAuth)
+                    PantallaFavoritos(
+                        modeloVista = modeloVista, 
+                        repositorioAuth = repositorioAuth,
+                        alNavegarReproductor = alNavegarReproductor
+                    )
                 }
                 composable("historial") {
-                    PantallaHistorial(modeloVista = modeloVista, repositorioAuth = repositorioAuth)
+                    PantallaHistorial(
+                        modeloVista = modeloVista,
+                        alNavegarReproductor = alNavegarReproductor
+                    )
                 }
                 composable("ajustes") {
                     PantallaAjustes(

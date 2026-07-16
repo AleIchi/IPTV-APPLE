@@ -15,3 +15,7 @@ actual suspend fun descargarM3U(url: String): String {
     // TODO: Implementar descarga HTTP para iOS usando Ktor o NSURLSession
     return ""
 }
+
+actual fun mostrarMensaje(mensaje: String) {
+    println("TOAST: $mensaje")
+}

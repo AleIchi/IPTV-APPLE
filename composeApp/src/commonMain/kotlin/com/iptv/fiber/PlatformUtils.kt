@@ -6,3 +6,5 @@ expect fun generarUUID(): String
 expect fun EfectoBloqueoCaptura(bloquear: Boolean)
 
 expect suspend fun descargarM3U(url: String): String
+
+expect fun mostrarMensaje(mensaje: String)
