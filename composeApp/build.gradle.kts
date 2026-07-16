@@ -4,7 +4,7 @@ plugins {
     id("org.jetbrains.compose") version "1.6.0"
     id("org.jetbrains.kotlin.plugin.compose")
     id("kotlin-parcelize")
-    id("com.google.devtools.ksp")
+    id("com.google.devtools.ksp") version "2.2.10-2.0.2"
 }
 
 kotlin {
