@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Tema.IPTVFiber" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Tema.IPTVFiber" parent="@android:style/Theme.Black.NoTitleBar">
         <!-- Los temas de Material3 se manejan principalmente en Compose -->
         <!-- Este tema se mantiene minimalista por compatibilidad -->
     </style>

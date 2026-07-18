@@ -328,7 +328,7 @@ class RepositorioAutenticacion(
                         val datos = analizador.procesar(contenido)
                         com.iptv.fiber.datos.repositorio.RepositorioContenido.establecerDatosM3U(datos)
                     } catch (e: Exception) {
-                        android.util.Log.e("InicioAutomatico", "Error al recargar lista M3U", e)
+                        println("InicioAutomatico Error al recargar lista M3U: $e")
                     }
                 }
                 _estaAutenticado.value = true
@@ -337,7 +337,7 @@ class RepositorioAutenticacion(
                 false
             }
         } catch (e: Exception) {
-            android.util.Log.e("InicioAutomatico", "Error durante inicio de sesión automático", e)
+            println("InicioAutomatico Error durante inicio de sesión automático: $e")
             false
         }
     }
