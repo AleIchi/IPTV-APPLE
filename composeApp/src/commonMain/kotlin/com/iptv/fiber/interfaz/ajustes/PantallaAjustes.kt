@@ -83,7 +83,7 @@ fun PantallaAjustes(
     val diasRestantes = remember(fechaExpiracion) {
         try {
             if (fechaExpiracion.isNotEmpty() && fechaExpiracion != "null" && fechaExpiracion != "0") {
-                val diferencia = (fechaExpiracion.toLong() * 1000) - System.currentTimeMillis()
+                val diferencia = (fechaExpiracion.toLong() * 1000) - kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
                 if (diferencia > 0) (diferencia / (1000 * 60 * 60 * 24)).toInt() else 0
             } else -1
         } catch (_: Exception) { -1 }

@@ -1,10 +1,9 @@
 package com.iptv.fiber.datos.modelo
 
-// removed android import: import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 /** Datos de conexión a un servidor IPTV guardados localmente (URL, credenciales, estado activo). */
-@Parcelize
+@Serializable
 data class ConfiguracionServidor(
     val id: String,
     val urlServidor: String,
@@ -12,6 +11,6 @@ data class ConfiguracionServidor(
     val contrasena: String,
     val estaActivo: Boolean = false,
     val nombreServidor: String = "",
-    val creadoEn: Long = System.currentTimeMillis()
-) : Parcelable
+    val creadoEn: Long = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
+)
 

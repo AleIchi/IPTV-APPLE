@@ -55,6 +55,9 @@ kotlin {
             
             // Navigation
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.7.0-alpha06")
+            
+            // DateTime
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
         }
         
         androidMain.dependencies {
@@ -124,4 +127,10 @@ android {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+}
+
+compose {
+    resources {
+        packageOfResClass = "com.iptv.fiber.resources"
+    }
 }

@@ -1,9 +1,9 @@
 package com.iptv.fiber.datos.repositorio
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonParser
 import com.iptv.fiber.datos.api.ClienteApi
+import io.ktor.http.isSuccess
+import io.ktor.client.statement.bodyAsText
+import kotlinx.serialization.json.Json
 import com.iptv.fiber.datos.local.base_datos.DaoFavorito
 import com.iptv.fiber.datos.local.base_datos.DaoSeguirViendo
 import com.iptv.fiber.datos.local.base_datos.Favorito
@@ -30,8 +30,6 @@ class RepositorioContenido(
         private val daoFavorito: DaoFavorito,
         private val daoSeguirViendo: DaoSeguirViendo
 ) {
-    private val gson: Gson = GsonBuilder().setLenient().create()
-
     companion object {
         private const val LIMITE_HISTORIAL = 50
         private var canalesEnCache: List<Canal> = emptyList()
@@ -261,45 +259,12 @@ class RepositorioContenido(
      * Si encuentra un canal roto, imprime un error, lo salta, y sigue con el siguiente.
      * ¡Así aseguramos que la lista se cargue sí o sí!
      */
-    private inline fun <reified T> parsearJsonParcial(reader: java.io.Reader): List<T> {
-        val lista = mutableListOf<T>()
-        val jsonReader = com.google.gson.stream.JsonReader(reader)
-        jsonReader.isLenient = true
-        try {
-            if (jsonReader.peek() == com.google.gson.stream.JsonToken.BEGIN_ARRAY) {
-                jsonReader.beginArray()
-                while (jsonReader.hasNext()) {
-                    try {
-                        val elemento = gson.fromJson<T>(jsonReader, T::class.java)
-                        if (elemento != null) {
-                            lista.add(elemento)
-                        }
-                    } catch (e: Exception) {
-                        android.util.Log.e("RepositorioContenido", "Error al parsear objeto individual, saltando", e)
-                        try {
-                            jsonReader.skipValue()
-                        } catch (_: Exception) {}
-                    }
-                }
-                jsonReader.endArray()
-            } else if (jsonReader.peek() == com.google.gson.stream.JsonToken.BEGIN_OBJECT) {
-                val elemento = gson.fromJson<T>(jsonReader, T::class.java)
-                if (elemento != null) {
-                    lista.add(elemento)
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("RepositorioContenido", "Error catastrófico en parsearJsonParcial", e)
-        } finally {
-            try {
-                jsonReader.close()
-            } catch (_: Exception) {}
-        }
-        return lista
-    }
-
     private inline fun <reified T> parsearJsonParcial(jsonTexto: String): List<T> {
-        return parsearJsonParcial(java.io.StringReader(jsonTexto))
+        return try {
+            Json { ignoreUnknownKeys = true }.decodeFromString<List<T>>(jsonTexto)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     /** Obtiene las categorías de TV en vivo desde el servidor o desde los datos M3U si el usuario usa lista local. */
@@ -320,19 +285,19 @@ class RepositorioContenido(
                             servidor.usuario,
                             servidor.contrasena
                     )
-            if (respuesta.isSuccessful) {
-                val cuerpo = respuesta.body()
-                if (cuerpo == null) {
+            if (respuesta.status.isSuccess()) {
+                val cuerpo = respuesta.bodyAsText()
+                if (cuerpo.isBlank()) {
                     Result.success(emptyList())
                 } else {
-                    val categorias = parsearJsonParcial<Categoria>(cuerpo.charStream())
+                    val categorias = parsearJsonParcial<Categoria>(cuerpo)
                     establecerCategoriasCache(categorias)
                     Result.success(categorias)
                 }
             } else {
                 Result.failure(
                         Exception(
-                                "Error al cargar categorías: ${respuesta.errorBody()?.string() ?: "Error desconocido"}"
+                                "Error al cargar categorías: ${respuesta.bodyAsText()}"
                         )
                 )
             }
@@ -367,10 +332,10 @@ class RepositorioContenido(
                             servidor.contrasena,
                             idCategoria = idCategoria
                     )
-            if (respuesta.isSuccessful) {
-                val cuerpo = respuesta.body()
-                if (cuerpo != null) {
-                    val canalesRaw = parsearJsonParcial<Canal>(cuerpo.charStream())
+            if (respuesta.status.isSuccess()) {
+                val cuerpo = respuesta.bodyAsText()
+                if (cuerpo.isNotBlank()) {
+                    val canalesRaw = parsearJsonParcial<Canal>(cuerpo)
                     if (canalesRaw.isNotEmpty()) {
                         val canales = procesarLogotipos(canalesRaw)
                         actualizarCache(canales)
@@ -384,7 +349,7 @@ class RepositorioContenido(
             } else {
                 Result.failure(
                         Exception(
-                                "Error al cargar canales: ${respuesta.errorBody()?.string() ?: "Error desconocido"}"
+                                "Error al cargar canales: ${respuesta.bodyAsText()}"
                         )
                 )
             }
@@ -419,8 +384,10 @@ class RepositorioContenido(
                             servidor.contrasena,
                             idTransmision = idTransmision
                     )
-            if (respuesta.isSuccessful) {
-                emit(Result.success(respuesta.body() ?: emptyMap()))
+            if (respuesta.status.isSuccess()) {
+                val cuerpo = respuesta.bodyAsText()
+                val epgs = try { Json { ignoreUnknownKeys = true }.decodeFromString<Map<String, List<EPG>>>(cuerpo) } catch(e:Exception){ emptyMap() }
+                emit(Result.success(epgs))
             } else {
                 emit(Result.failure(Exception("Error al cargar la guía de programación")))
             }

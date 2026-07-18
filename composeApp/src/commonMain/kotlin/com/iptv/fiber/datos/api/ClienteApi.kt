@@ -29,10 +29,8 @@ class ClienteApi {
     private val apisPorServidor = mutableMapOf<String, ApiXtreamCodes>()
 
     companion object {
-        @Volatile private var INSTANCIA: ClienteApi? = null
-        fun obtener(): ClienteApi = INSTANCIA ?: synchronized(this) {
-            INSTANCIA ?: ClienteApi().also { INSTANCIA = it }
-        }
+        private val INSTANCIA by lazy { ClienteApi() }
+        fun obtener(): ClienteApi = INSTANCIA
     }
 
     fun crearApi(): ApiXtreamCodes {
@@ -41,10 +39,8 @@ class ClienteApi {
 
     fun crearApiParaServidor(urlBase: String): ApiXtreamCodes {
         val urlLimpia = if (urlBase.endsWith("/")) urlBase else "$urlBase/"
-        return synchronized(apisPorServidor) {
-            apisPorServidor.getOrPut(urlLimpia) {
-                ApiXtreamCodes(httpClient)
-            }
+        return apisPorServidor.getOrPut(urlLimpia) {
+            ApiXtreamCodes(httpClient)
         }
     }
 }

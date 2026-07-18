@@ -116,7 +116,7 @@ fun calcularProgresoEpg(epg: EPG): Float {
     try {
         val inicio = epg.marca_tiempo_inicio?.toLongOrNull() ?: return 0f
         val fin = epg.marca_tiempo_fin?.toLongOrNull() ?: return 0f
-        val ahora = System.currentTimeMillis() / 1000
+        val ahora = kotlinx.datetime.Clock.System.now().toEpochMilliseconds() / 1000
         
         if (ahora < inicio) return 0f
         if (ahora > fin) return 1f

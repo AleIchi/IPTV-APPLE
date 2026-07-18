@@ -17,5 +17,5 @@ data class SeguirViendo(
     val duracion: Long,             // Duración total en milisegundos
     val icono: String? = null,
     val idServidor: String,
-    val actualizadoEn: Long = System.currentTimeMillis()
+    val actualizadoEn: Long = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
 )

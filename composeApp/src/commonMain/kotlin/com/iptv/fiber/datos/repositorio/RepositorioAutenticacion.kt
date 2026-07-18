@@ -1,9 +1,11 @@
 package com.iptv.fiber.datos.repositorio
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonParser
 import com.iptv.fiber.datos.api.ClienteApi
+import io.ktor.http.isSuccess
+import io.ktor.client.statement.bodyAsText
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import com.iptv.fiber.datos.modelo.RespuestaApi
 import com.iptv.fiber.datos.modelo.ConfiguracionServidor
 import com.iptv.fiber.datos.modelo.InfoServidor
@@ -90,8 +92,7 @@ class RepositorioAutenticacion(
         }
     }
 
-    private val gson: Gson = GsonBuilder().setLenient().create()
-
+    // Gson removido
     private val _servidorActual = MutableStateFlow<ConfiguracionServidor?>(null)
     val servidorActual: StateFlow<ConfiguracionServidor?> = _servidorActual.asStateFlow()
 
@@ -123,56 +124,30 @@ class RepositorioAutenticacion(
 
             val respuesta = api.autenticar(urlAuth, usuario, contrasena)
 
-            if (respuesta.isSuccessful) {
-                val cuerpo = respuesta.body()
-                if (cuerpo != null) {
+            if (respuesta.status.isSuccess()) {
+                val jsonTexto = respuesta.bodyAsText()
+                if (jsonTexto.isNotBlank()) {
                     try {
-                        val jsonTexto = cuerpo.string()
                         var infoUsuario: InfoUsuario? = null
                         var nombreServidor = urlLimpia
 
                         try {
-                            val objetoJson = JsonParser.parseString(jsonTexto).asJsonObject
-                            if (objetoJson.has("user_info")) {
-                                val jsonInfoUsuario = objetoJson.getAsJsonObject("user_info")
-                                infoUsuario = gson.fromJson(jsonInfoUsuario, InfoUsuario::class.java)
-                                if (objetoJson.has("server_info")) {
+                            val objetoJson = Json.parseToJsonElement(jsonTexto).jsonObject
+                            if (objetoJson.containsKey("user_info")) {
+                                val jsonInfoUsuario = objetoJson["user_info"]!!
+                                infoUsuario = Json { ignoreUnknownKeys = true }.decodeFromJsonElement<InfoUsuario>(jsonInfoUsuario)
+                                if (objetoJson.containsKey("server_info")) {
                                     try {
-                                        val jsonInfoServidor = objetoJson.getAsJsonObject("server_info")
-                                        val infoServidor = gson.fromJson(jsonInfoServidor, InfoServidor::class.java)
+                                        val jsonInfoServidor = objetoJson["server_info"]!!
+                                        val infoServidor = Json { ignoreUnknownKeys = true }.decodeFromJsonElement<InfoServidor>(jsonInfoServidor)
                                         if (infoServidor.url.isNotEmpty()) nombreServidor = infoServidor.url
-                                    } catch (_: Exception) { /* JSON de servidor incompleto, se usa valor por defecto */ }
+                                    } catch (_: Exception) { /* JSON de servidor incompleto */ }
                                 }
                             }
                         } catch (_: Exception) {
-                            // El JSON no se puede parsear completamente, intentar extraer user_info manualmente
                             try {
-                                val inicioUserInfo = jsonTexto.indexOf("\"user_info\"")
-                                if (inicioUserInfo >= 0) {
-                                    val inicioObjeto = jsonTexto.indexOf('{', inicioUserInfo)
-                                    if (inicioObjeto >= 0) {
-                                        var contadorLlaves = 0
-                                        var i = inicioObjeto
-                                        var finObjeto = -1
-                                        while (i < jsonTexto.length) {
-                                            when (jsonTexto[i]) {
-                                                '{' -> contadorLlaves++
-                                                '}' -> { contadorLlaves--; if (contadorLlaves == 0) { finObjeto = i + 1; break } }
-                                            }
-                                            i++
-                                        }
-                                        if (finObjeto > inicioObjeto) {
-                                            val jsonUsuario = jsonTexto.substring(inicioObjeto, finObjeto)
-                                            infoUsuario = gson.fromJson(jsonUsuario, InfoUsuario::class.java)
-                                        }
-                                    }
-                                }
-                            } catch (_: Exception) { /* Extracción manual fallida */ }
-
-                            if (infoUsuario == null) {
-                                try { infoUsuario = gson.fromJson(jsonTexto, InfoUsuario::class.java) }
-                                catch (_: Exception) { /* Todos los intentos de parseo fallaron */ }
-                            }
+                                infoUsuario = Json { ignoreUnknownKeys = true }.decodeFromString<InfoUsuario>(jsonTexto)
+                            } catch (_: Exception) {}
                         }
 
                         if (infoUsuario != null) {
@@ -188,7 +163,6 @@ class RepositorioAutenticacion(
                                 )
                                 gestorPreferencias.guardarCredenciales(urlLimpia, usuario, contrasena)
                                 
-                                // Guardar detalles de cuenta adicionales (Expiración, conexiones, etc)
                                 val expDate = infoUsuario.fechaExpiracion ?: ""
                                 val maxCon = infoUsuario.conexionesMaximas ?: ""
                                 val estado = infoUsuario.estado ?: ""
@@ -204,14 +178,14 @@ class RepositorioAutenticacion(
                             Result.failure(Exception("No se pudo leer la respuesta del servidor. Verifica tus datos o intenta de nuevo."))
                         }
                     } catch (e: Exception) {
-                        val errorTraducido = traducirError(e.localizedMessage ?: "Error al leer la respuesta")
+                        val errorTraducido = traducirError(e.message ?: "Error al leer la respuesta")
                         Result.failure(Exception("Error al leer la respuesta. $errorTraducido"))
                     }
                 } else {
                     Result.failure(Exception("Respuesta vacía del servidor"))
                 }
             } else {
-                val codigoError = respuesta.code()
+                val codigoError = respuesta.status.value
                 val mensaje = when (codigoError) {
                     401 -> "Usuario o contraseña incorrectos. Verifica tus credenciales."
                     403 -> "Acceso denegado. Es posible que tu cuenta haya expirado o esté bloqueada."
@@ -221,15 +195,16 @@ class RepositorioAutenticacion(
                 }
                 Result.failure(Exception(mensaje))
             }
-        } catch (e: java.net.UnknownHostException) {
-            Result.failure(Exception("No se pudo encontrar el servidor. Revisa tu conexión a internet o la URL."))
-        } catch (e: java.net.ConnectException) {
-            Result.failure(Exception("No se pudo conectar al servidor. Asegúrate de que el servidor esté activo."))
-        } catch (e: java.net.SocketTimeoutException) {
-            Result.failure(Exception("Tiempo de espera agotado. El servidor está tardando demasiado en responder."))
         } catch (e: Exception) {
-            val errorTraducido = traducirError(e.localizedMessage ?: "Fallo de conexión")
-            Result.failure(Exception(errorTraducido))
+            val msj = e.message ?: ""
+            if (msj.contains("timeout", true)) {
+                Result.failure(Exception("Tiempo de espera agotado. El servidor está tardando demasiado en responder."))
+            } else if (msj.contains("host", true) || msj.contains("resolve", true)) {
+                Result.failure(Exception("No se pudo encontrar el servidor. Revisa tu conexión a internet o la URL."))
+            } else {
+                val errorTraducido = traducirError(e.message ?: "Fallo de conexión")
+                Result.failure(Exception(errorTraducido))
+            }
         }
     }
 
@@ -303,17 +278,18 @@ class RepositorioAutenticacion(
             gestorPreferencias.guardarCredenciales(urlNormalizada, USUARIO_LISTA_M3U, "")
 
             Result.success(InfoUsuario(usuario = "Modo M3U", estado = "Activo", auth = 1, mensaje = "Lista cargada"))
-        } catch (e: java.net.UnknownHostException) {
-            Result.failure(Exception("No se pudo cargar la lista. No se encuentra el servidor. Revisa tu conexión a internet o la URL."))
-        } catch (e: java.io.FileNotFoundException) {
-            Result.failure(Exception("No se pudo cargar la lista. El archivo no existe en la URL proporcionada (Error 404)."))
-        } catch (e: java.net.SocketTimeoutException) {
-            Result.failure(Exception("No se pudo cargar la lista. Tiempo de espera agotado al descargar el archivo."))
-        } catch (e: javax.net.ssl.SSLHandshakeException) {
-            Result.failure(Exception("No se pudo cargar la lista. Error de seguridad SSL. Verifica que la fecha y hora de tu dispositivo sean correctas."))
         } catch (e: Exception) {
-            val errorTraducido = traducirError(e.localizedMessage ?: "Error al cargar la lista")
-            Result.failure(Exception("No se pudo cargar la lista. $errorTraducido"))
+            val msj = e.message ?: ""
+            if (msj.contains("ssl", true) || msj.contains("handshake", true)) {
+                Result.failure(Exception("No se pudo cargar la lista. Error de seguridad SSL. Verifica que la fecha y hora de tu dispositivo sean correctas."))
+            } else if (msj.contains("timeout", true)) {
+                Result.failure(Exception("No se pudo cargar la lista. Tiempo de espera agotado al descargar el archivo."))
+            } else if (msj.contains("host", true) || msj.contains("resolve", true)) {
+                Result.failure(Exception("No se pudo cargar la lista. No se encuentra el servidor. Revisa tu conexión a internet o la URL."))
+            } else {
+                val errorTraducido = traducirError(e.message ?: "Error al cargar la lista")
+                Result.failure(Exception("No se pudo cargar la lista. $errorTraducido"))
+            }
         }
     }
     /** Intenta recuperar una sesión guardada. */
@@ -331,7 +307,7 @@ class RepositorioAutenticacion(
             val usuarioGuardado = credenciales[1]
             val contrasenaGuardada = credenciales[2]
 
-            android.util.Log.d("InicioAutomatico", "URL: '$urlGuardada', Usuario: '$usuarioGuardado'")
+            println("InicioAutomatico URL: '$urlGuardada', Usuario: '$usuarioGuardado'")
 
             val modoM3U = esUsuarioListaM3U(usuarioGuardado)
 

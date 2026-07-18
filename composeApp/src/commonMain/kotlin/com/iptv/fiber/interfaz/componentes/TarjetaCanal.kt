@@ -94,7 +94,7 @@ fun TarjetaCanal(
                         fontWeight = FontWeight.Medium
                     )
 
-                    // remember evita recalcular System.currentTimeMillis() en cada recomposición
+                    // remember evita recalcular kotlinx.datetime.Clock.System.now().toEpochMilliseconds() en cada recomposición
                     val progreso = remember(programaActual) { calcularProgresoEpg(programaActual) }
                     if (progreso > 0f) {
                         Spacer(modifier = Modifier.height(8.dp))

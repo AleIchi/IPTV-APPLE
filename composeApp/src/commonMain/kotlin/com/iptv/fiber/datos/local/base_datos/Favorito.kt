@@ -15,5 +15,5 @@ data class Favorito(
     val idTransmision: Int,
     val icono: String? = null,
     val idServidor: String,
-    val agregadoEn: Long = System.currentTimeMillis()
+    val agregadoEn: Long = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
 )
