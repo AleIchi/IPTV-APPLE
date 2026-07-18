@@ -11,7 +11,7 @@ abstract class BaseDatosIPTV : RoomDatabase() {
     companion object {
         private val INSTANCIA: BaseDatosIPTV by lazy {
             getDatabaseBuilder()
-                .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
         }
 

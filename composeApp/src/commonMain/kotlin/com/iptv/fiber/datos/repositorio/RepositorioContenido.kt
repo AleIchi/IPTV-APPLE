@@ -384,13 +384,7 @@ class RepositorioContenido(
                             servidor.contrasena,
                             idTransmision = idTransmision
                     )
-            if (respuesta.status.isSuccess()) {
-                val cuerpo = respuesta.bodyAsText()
-                val epgs = try { Json { ignoreUnknownKeys = true }.decodeFromString<Map<String, List<EPG>>>(cuerpo) } catch(e:Exception){ emptyMap() }
-                emit(Result.success(epgs))
-            } else {
-                emit(Result.failure(Exception("Error al cargar la guía de programación")))
-            }
+            emit(Result.success(respuesta))
         } catch (e: Exception) {
             emit(Result.failure(e))
         }

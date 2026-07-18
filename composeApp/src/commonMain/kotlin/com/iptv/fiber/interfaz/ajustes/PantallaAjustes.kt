@@ -91,8 +91,9 @@ fun PantallaAjustes(
     val fechaFormateada = remember(fechaExpiracion) {
         try {
             if (fechaExpiracion.isNotEmpty() && fechaExpiracion != "null" && fechaExpiracion != "0") {
-                val fecha = java.util.Date(fechaExpiracion.toLong() * 1000)
-                java.text.SimpleDateFormat("dd 'de' MMMM, yyyy", java.util.Locale("es", "PE")).format(fecha)
+                val instante = kotlinx.datetime.Instant.fromEpochMilliseconds(fechaExpiracion.toLong() * 1000)
+                val fecha = instante.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                "${fecha.dayOfMonth}/${fecha.monthNumber}/${fecha.year}"
             } else "Indefinida"
         } catch (_: Exception) { "Indefinida" }
     }
@@ -255,7 +256,7 @@ fun PantallaAjustes(
             CenterAlignedTopAppBar(
                 title = { Text("Cuenta", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                 navigationIcon = {
-                    IconButton(onClick = { despachadorAtras?.onBackPressed() }) {
+                    IconButton(onClick = { /* TODO */ }) {
                         Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Atrás", tint = Color.White, modifier = Modifier.size(20.dp))
                     }
                 },

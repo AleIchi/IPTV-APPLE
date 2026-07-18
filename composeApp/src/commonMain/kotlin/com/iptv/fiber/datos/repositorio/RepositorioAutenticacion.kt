@@ -33,7 +33,7 @@ class RepositorioAutenticacion(
     private val clienteApi: ClienteApi,
     private val gestorPreferencias: GestorPreferencias
 ) {
-    private val alcanceRepositorio = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val alcanceRepositorio = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     companion object {
         const val USUARIO_LISTA_M3U = "LISTA_M3U"
         private const val USUARIO_LISTA_M3U_ANTERIOR = "M3U_PLAYLIST"

@@ -117,14 +117,7 @@ fun ContenidoInicioPanelPrincipal(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(id = com.iptv.fiber.R.drawable.logotipo_fiber_z),
-                    contentDescription = "Fiber Z TV+",
-                    modifier = Modifier
-                        .height(28.dp)
-                        .widthIn(max = 150.dp),
-                    contentScale = ContentScale.Fit
-                )
+                Text("Fiber Z TV+", color = Color.White, fontWeight = FontWeight.Bold)
                 Row {
                     IconButton(onClick = { alNavegar("envivo") }) {
                         Icon(Icons.Default.Search, "Buscar", tint = Color.White)
@@ -141,42 +134,7 @@ fun ContenidoInicioPanelPrincipal(
 
         // Carrusel de promociones
         item {
-            val anuncios = listOf(
-                com.iptv.fiber.R.drawable.promocion_camara,
-                com.iptv.fiber.R.drawable.promocion_fibra_juegos,
-                com.iptv.fiber.R.drawable.promocion_fibra_optica,
-                com.iptv.fiber.R.drawable.promocion_tv_en_vivo,
-                com.iptv.fiber.R.drawable.promocion_tv_estable,
-                com.iptv.fiber.R.drawable.promocion_deportes_en_vivo
-            )
-            val estadoPaginador = rememberPagerState(pageCount = { anuncios.size })
-            LaunchedEffect(Unit) {
-                while (true) {
-                    delay(5000)
-                    estadoPaginador.animateScrollToPage((estadoPaginador.currentPage + 1) % anuncios.size)
-                }
-            }
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1.77f) // Proporción perfecta 16:9 para banners de TV
-                    .padding(bottom = 24.dp),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
-            ) {
-                HorizontalPager(state = estadoPaginador, modifier = Modifier.fillMaxSize()) { pagina ->
-                    coil3.compose.AsyncImage(
-                        model = anuncios[pagina],
-                        contentDescription = "Imagen promocional",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable {
-                                manejadorUris.openUri("https://fiberztelecom.com/")
-                            },
-                        contentScale = ContentScale.Crop // Mantiene proporción perfecta sin estirar la imagen
-                    )
-                }
-            }
+            // TODO: Migrar carrusel a composeResources
         }
 
         // 10 canales principales

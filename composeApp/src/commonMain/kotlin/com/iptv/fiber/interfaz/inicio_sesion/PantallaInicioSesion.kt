@@ -129,13 +129,11 @@ fun PantallaInicioSesion(
         ) {
             // Logotipo de marca premium
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 32.dp)) {
-                Image(
-                    painter = painterResource(id = com.iptv.fiber.R.drawable.logotipo_fiber_z),
+                Icon(
+                    imageVector = Icons.Default.Tv,
                     contentDescription = "Fiber Z TV+",
-                    modifier = Modifier
-                        .fillMaxWidth(0.7f)
-                        .wrapContentHeight(),
-                    contentScale = ContentScale.FillWidth
+                    tint = Color.White,
+                    modifier = Modifier.size(120.dp)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
