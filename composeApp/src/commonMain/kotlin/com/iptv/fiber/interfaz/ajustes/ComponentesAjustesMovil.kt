@@ -140,8 +140,7 @@ fun DialogoPin(
         listOf("⌫","0","✓")
     )
 
-    val configuracion = androidx.compose.ui.platform.LocalConfiguration.current
-    val esHorizontal = configuracion.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    val esHorizontal = false
 
     Dialog(
         onDismissRequest = alCancelar,

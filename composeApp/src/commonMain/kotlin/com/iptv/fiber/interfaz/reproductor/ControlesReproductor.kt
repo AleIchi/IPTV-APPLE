@@ -18,12 +18,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.iptv.fiber.interfaz.tema.*
 import com.iptv.fiber.interfaz.componentes.IconoTvPorDefecto
 
@@ -43,9 +42,7 @@ fun SuperposicionControlesReproductor(
     alMostrarAjustes: () -> Unit,
     alAlternarFavorito: () -> Unit
 ) {
-    val contexto = androidx.compose.ui.platform.LocalContext.current as android.app.Activity
-    val configuracion = LocalConfiguration.current
-    val esVertical = configuracion.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
+    val esVertical = false
 
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedVisibility(
@@ -63,18 +60,14 @@ fun SuperposicionControlesReproductor(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { contexto.finish() }) {
+                    IconButton(onClick = { /* TODO: Volver */ }) {
                         Icon(Icons.Default.ChevronLeft, "Volver", tint = Color.White, modifier = Modifier.size(28.dp))
                     }
                     
                     Spacer(modifier = Modifier.weight(1f))
                     
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        IconButton(onClick = {
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                contexto.enterPictureInPictureMode(android.app.PictureInPictureParams.Builder().build())
-                            }
-                        }) {
+                        IconButton(onClick = { /* TODO: PiP */ }) {
                             Icon(Icons.Default.PictureInPictureAlt, "Mini reproductor", tint = Color.White, modifier = Modifier.size(22.dp))
                         }
                         IconButton(onClick = { alAlternarFavorito() }) {
@@ -167,13 +160,7 @@ fun SuperposicionControlesReproductor(
 
                     // Botón de pantalla completa
                     IconButton(
-                        onClick = {
-                            contexto.requestedOrientation = if (esVertical) {
-                                android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                            } else {
-                                android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                            }
-                        },
+                        onClick = { /* TODO: Fullscreen */ },
                         modifier = Modifier.size(36.dp).background(Color.Black.copy(alpha = 0.6f), CircleShape)
                     ) {
                         Icon(

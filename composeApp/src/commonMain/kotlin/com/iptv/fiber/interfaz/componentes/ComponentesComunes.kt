@@ -14,13 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.SubcomposeAsyncImage
-import coil.request.CachePolicy
-import coil.request.ImageRequest
+import coil3.compose.SubcomposeAsyncImage
 import com.iptv.fiber.interfaz.tema.AcentoPremium
 
 import com.iptv.fiber.datos.modelo.EPG
@@ -92,17 +89,8 @@ fun IconoTvPorDefecto(modificador: Modifier = Modifier) {
  */
 @Composable
 fun ImagenCanal(url: String?, nombreCanal: String, tamano: Int, modificador: Modifier = Modifier) {
-    val contexto = LocalContext.current
     SubcomposeAsyncImage(
-        model = remember(url) {
-            ImageRequest.Builder(contexto)
-                .data(url)
-                .crossfade(false)
-                .size(tamano)
-                .memoryCachePolicy(CachePolicy.ENABLED)
-                .diskCachePolicy(CachePolicy.ENABLED)
-                .build()
-        },
+        model = url,
         contentDescription = nombreCanal,
         modifier = modificador,
         contentScale = ContentScale.Fit,
